@@ -6,6 +6,7 @@ RUN apt update && \
 
 RUN python3 -m pip install --no-cache-dir --upgrade pip
 RUN python3 -m pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+RUN python3 -m pip install --no-cache-dir pytest
 RUN python3 -m pip install --no-cache-dir transformers datasets evaluate accelerate
 
 WORKDIR /workspace
