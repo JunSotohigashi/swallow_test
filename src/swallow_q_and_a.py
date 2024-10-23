@@ -25,27 +25,30 @@ system_prompt_tail = """
 """
 
 
-try:
-    while True:
-        user_prompt = input(">")
-        encode_inputs = tokenizer(
-            system_prompt_head + user_prompt + system_prompt_tail, return_tensors="pt"
-        ).to(model.device)
-        input_token_length = encode_inputs["input_ids"].shape[1]
+def ask_and_answer(question: str) -> str:
+    encode_inputs = tokenizer(
+        system_prompt_head + question + system_prompt_tail, return_tensors="pt"
+    ).to(model.device)
+    input_token_length = encode_inputs["input_ids"].shape[1]
+    output_ids = model.generate(
+        encode_inputs["input_ids"],
+        attention_mask=encode_inputs["attention_mask"],
+        max_new_tokens=10,
+        repetition_penalty=2.0,
+        pad_token_id=tokenizer.eos_token_id,
+    )
+    generated_prompt = tokenizer.decode(
+        output_ids[0][input_token_length:], skip_special_tokens=True
+    )
+    return generated_prompt
 
-        output_ids = model.generate(
-            encode_inputs["input_ids"],
-            attention_mask=encode_inputs["attention_mask"],
-            max_new_tokens=10,
-            repetition_penalty=2.0,
-            pad_token_id=tokenizer.eos_token_id,
-        )
 
-        generated_prompt = tokenizer.decode(
-            output_ids[0][input_token_length:], skip_special_tokens=True
-        )
+if __name__ == "__main__":
+    try:
+        while True:
+            question = input(">")
+            answer = ask_and_answer(question)
+            print(answer)
 
-        print(generated_prompt)
-
-except KeyboardInterrupt:
-    print("KeyboardInterrupt")
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt")
